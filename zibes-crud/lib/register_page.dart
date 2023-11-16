@@ -35,17 +35,19 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    addUserDetials(_firstNameController.text.trim(),
+    addUserDetails(_firstNameController.text.trim(),
         _secondNameController.text.trim(), _emailController.text.trim());
   }
 
-  Future addUserDetials(
+  Future addUserDetails(
       String firstName, String secondName, String email) async {
-    await FirebaseFirestore.instance.collection('users').add({
+    await FirebaseFirestore.instance.collection('users').add(
+      {
       "firstname": firstName,
       "secondname": secondName,
       "email": email,
-    });
+    },
+    );
   }
 
   @override
