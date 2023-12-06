@@ -1,11 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crud/read%20data/get_user_name.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'update_page.dart'; // Import the update page
+import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -20,21 +19,16 @@ class _HomePageState extends State<HomePage> {
   // get docIDs
   Future getDocId() async {
     await FirebaseFirestore.instance.collection('users').get().then(
-      (snapshot) => snapshot.docs.forEach((document) {
-        print(document.reference);
-        docIDs.add(document.reference.id);
-      }),
-    );
+          (snapshot) => snapshot.docs.forEach((document) {
+            print(document.reference);
+            docIDs.add(document.reference.id);
+          }),
+        );
   }
 
-  // Function to navigate to the update page
-  void _navigateToUpdatePage(String documentId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => UpdatePage(documentId: documentId),
-      ),
-    );
+  // delete user by document ID
+  Future deleteUser(String documentId) async {
+    await FirebaseFirestore.instance.collection('users').doc(documentId).delete();
   }
 
   @override
@@ -80,9 +74,32 @@ class _HomePageState extends State<HomePage> {
                         title: GetUserName(documentId: docIDs[index]),
                         tileColor: Colors.green[200],
                         trailing: IconButton(
-                          icon: Icon(Icons.edit),
+                          icon: Icon(Icons.delete),
                           onPressed: () {
-                            _navigateToUpdatePage(docIDs[index]);
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text("Delete User?"),
+                                  content: Text("Are you sure you want to delete this user?"),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text("Cancel"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        deleteUser(docIDs[index]);
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text("Delete"),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
                           },
                         ),
                       );
