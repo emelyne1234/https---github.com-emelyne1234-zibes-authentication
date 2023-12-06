@@ -31,6 +31,15 @@ class _HomePageState extends State<HomePage> {
     await FirebaseFirestore.instance.collection('users').doc(documentId).delete();
   }
 
+  // update user by document ID
+  Future updateUser(String documentId, String updatedData) async {
+    await FirebaseFirestore.instance.collection('users').doc(documentId).update(
+      {
+        'data': updatedData,
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,34 +82,47 @@ class _HomePageState extends State<HomePage> {
                       return ListTile(
                         title: GetUserName(documentId: docIDs[index]),
                         tileColor: Colors.green[200],
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text("Delete User?"),
-                                  content: Text("Are you sure you want to delete this user?"),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: Text("Cancel"),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        deleteUser(docIDs[index]);
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: Text("Delete"),
-                                    ),
-                                  ],
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit),
+                              onPressed: () {
+                                // Handle edit button press
+                                showUpdateForm(context, docIDs[index]);
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete),
+                              onPressed: () {
+                                // Handle delete button press
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text("Delete User?"),
+                                      content: Text("Are you sure you want to delete this user?"),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text("Cancel"),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            deleteUser(docIDs[index]);
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text("Delete"),
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 );
                               },
-                            );
-                          },
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -111,6 +133,44 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
+    );
+  }
+
+  void showUpdateForm(BuildContext context, String documentId) {
+    TextEditingController updatedDataController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Update User Data"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: updatedDataController,
+                decoration: InputDecoration(labelText: "Updated Data"),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                String updatedData = updatedDataController.text;
+                updateUser(documentId, updatedData);
+                Navigator.of(context).pop();
+              },
+              child: Text("Update"),
+            ),
+          ],
+        );
+      },
     );
   }
 }
